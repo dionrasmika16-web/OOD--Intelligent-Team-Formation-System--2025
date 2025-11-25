@@ -43,8 +43,18 @@ public class Main {
 
                 case "UP":
                     //Gets File Location--->File is loaded and processed--->Players are saved in PlayerDataManager PlayerFileArray(Players loaded from a file)
-                    playerDataManager.addFilePlayers(playerFileHandler.loadFromFile(playerFileHandler.getFileAddress()));
+                    String val=playerFileHandler.getFileAddress();
+                    System.out.println(val);
+                    playerDataManager.addFilePlayers(playerFileHandler.loadFromFile(val));
                     System.out.println("File Successfully Uploaded!");
+                    break;
+
+                case "FT":
+                    playerDataManager.addFilePlayers(playerFileHandler.loadFromFile(
+                            "C:\\Users\\Extra\\Desktop\\CM1601 VIVA\\Starter pack\\Starter pack\\participants_sample.csv"));
+
+                    GenerateTeamSetupHandler generateTeamSetupHandler=new GenerateTeamSetupHandler(playerDataManager.getAllPlayers(),5);
+                    generateTeamSetupHandler.formTeam();
                     break;
 
                 case "SFS":

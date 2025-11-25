@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -90,9 +91,9 @@ public abstract class AbstractFileHandler {
 
     public abstract List<Player> loadFromFile(String path);
 
-    public abstract void saveToFile(String path, List<Player> players);
+    public abstract void saveToFile(String path, ArrayList<Player> players);
 
-    public abstract void saveToFolder(String path, List<Player> players);
+    public abstract void saveToFolder(String path, ArrayList<Player> players);
 
 
 

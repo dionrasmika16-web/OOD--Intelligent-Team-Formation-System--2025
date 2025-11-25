@@ -13,8 +13,8 @@ public class PlayerFileHandler extends AbstractFileHandler {
     }
 
     @Override
-    public List<Player> loadFromFile(String path) {
-        List<Player> players = new ArrayList<>();
+    public ArrayList<Player> loadFromFile(String path) {
+        ArrayList<Player> players = new ArrayList<>();
 
         try {
             File file = new File(path);
@@ -52,7 +52,7 @@ public class PlayerFileHandler extends AbstractFileHandler {
     }
 
     @Override
-    public void saveToFile(String path, List<Player> players) {
+    public void saveToFile(String path, ArrayList<Player> players) {
         try {
             FileWriter writer = new FileWriter(path, true);//Appends to File
 
@@ -81,7 +81,7 @@ public class PlayerFileHandler extends AbstractFileHandler {
     }
 
     @Override
-    public void saveToFolder(String folderPath, List<Player> players) {
+    public void saveToFolder(String folderPath, ArrayList<Player> players) {
         String fileName = this.getFileName();
         File folder = new File(folderPath);
 

@@ -2,26 +2,33 @@ import java.util.*;
 
 public class PlayerDataManager {
 
-    private List<Player> Surveyplayers = new ArrayList<>();
-    private List<Player> Fileplayers = new ArrayList<>();
+    private ArrayList<Player> Surveyplayers = new ArrayList<>();
+    private ArrayList<Player> Fileplayers = new ArrayList<>();
+    private ArrayList<Player> AllPlayers = new ArrayList<>();
     private int surveyIdCounter = 1;
 
     public void addSurveyPlayer(Player player) {
         Surveyplayers.add(player);
+        AllPlayers.add(player);
         surveyIdCounter++;
     }
 
-    public void addFilePlayers(List<Player> player) {
+    public void addFilePlayers(ArrayList<Player> player) {
         Fileplayers.addAll(player);
+        AllPlayers.addAll(player);
         surveyIdCounter++;
     }
 
-    public List<Player> getSurveyplayers() {
+    public ArrayList<Player> getSurveyplayers() {
         return Surveyplayers;
     }
 
-    public List<Player> getFileplayers() {
+    public ArrayList<Player> getFileplayers() {
         return Fileplayers;
+    }
+
+    public ArrayList<Player> getAllPlayers() {
+        return AllPlayers;
     }
 
     //public List<Player> getAllPlayers() {
