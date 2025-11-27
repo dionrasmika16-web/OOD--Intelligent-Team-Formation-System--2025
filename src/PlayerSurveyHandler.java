@@ -12,7 +12,7 @@ public class PlayerSurveyHandler {
         //Checks whether in Range
         while (true) {
             try {
-                System.out.println(question);
+                System.out.print(question);
                 int value = Integer.parseInt(input.nextLine());
 
                 if (value < min || value > max) {
@@ -22,7 +22,7 @@ public class PlayerSurveyHandler {
                 }
 
             } catch (NumberFormatException e) {
-                System.out.println("Enter a number!");
+                System.out.println("Enter a number!: ");
             }
         }
     }
@@ -30,7 +30,7 @@ public class PlayerSurveyHandler {
     private String getNonEmptyString(String question) {
         //Checks for empty inputs
         while (true) {
-            System.out.println(question);
+            System.out.print(question);
             String value = input.nextLine().trim();
             if (!value.isEmpty()) return value;
 
@@ -40,7 +40,7 @@ public class PlayerSurveyHandler {
 
     private String getEmail(String question) {
         while (true) {
-            System.out.println(question);
+            System.out.print(question);
             String value = input.nextLine().trim();
 
             //Checks whether @ and . present in string
@@ -52,10 +52,10 @@ public class PlayerSurveyHandler {
 
     private String getValidatedChoice(String question, List<String> validOptions) {
         while (true) {
-            System.out.println(question);
+            System.out.print(question);
             String value = input.nextLine().trim();
 
-            if (validOptions.contains(value)) return value;
+            if (validOptions.contains(value.toUpperCase())) return value;
 
             System.out.println("Invalid option! Choose: " + validOptions);
         }
@@ -75,11 +75,11 @@ public class PlayerSurveyHandler {
         System.out.println("Take the Personality Test!");
 
         //Personality Questions
-        int q1 = getValidatedInt("1. I enjoy taking leadership.", 1, 5);
-        int q2 = getValidatedInt("2. I prefer strategy thinking.", 1, 5);
-        int q3 = getValidatedInt("3. I enjoy teamwork.", 1, 5);
-        int q4 = getValidatedInt("4. I stay calm under pressure.", 1, 5);
-        int q5 = getValidatedInt("5. I decide quickly in dynamic situations.", 1, 5);
+        int q1 = getValidatedInt("1. I enjoy taking leadership: ", 1, 5);
+        int q2 = getValidatedInt("2. I prefer strategy thinking: ", 1, 5);
+        int q3 = getValidatedInt("3. I enjoy teamwork: ", 1, 5);
+        int q4 = getValidatedInt("4. I stay calm under pressure: ", 1, 5);
+        int q5 = getValidatedInt("5. I decide quickly in dynamic situations: ", 1, 5);
 
         int total = (q1 + q2 + q3 + q4 + q5) * 4;
 
@@ -91,23 +91,14 @@ public class PlayerSurveyHandler {
         else personalityType = "Average";
 
         //Preferred Roles and Games
-        List<String> roles = Arrays.asList("Strategist", "Attacker", "Thinker", "Defender", "Supporter", "Coordinator");
-        String preferredRole = getValidatedChoice("Enter Preferred Role: " + roles, roles);
+        List<String> roles = Arrays.asList("STRATEGIST", "ATTACKER", "THINKER", "DEFENDER", "SUPPORTER", "COORDINATOR");
+        String preferredRole = getValidatedChoice("Enter Preferred Role: " + roles +" ", roles);
 
-        List<String> games = Arrays.asList("Valorant", "Dota", "FIFA", "Basketball", "Badminton", "Chess");
-        String preferredGame = getValidatedChoice("Enter Preferred Game: " + games, games);
+        List<String> games = Arrays.asList("VALORANT", "DOTA2", "FIFA", "BASKETBALL", "BADMINTON", "CHESS");
+        String preferredGame = getValidatedChoice("Enter Preferred Game: " + games +" ", games);
 
-        // Create Player object
-        return new Player(
-                String.valueOf(++nextId),
-                name,
-                email,
-                preferredGame,
-                skillLevel,
-                preferredRole,
-                total,
-                personalityType
-        );
+        // create player object
+        return new Player(String.valueOf(++nextId), name, email, preferredGame, skillLevel, preferredRole, total, personalityType);
     }
 
 }

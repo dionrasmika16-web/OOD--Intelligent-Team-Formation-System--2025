@@ -8,99 +8,132 @@ public class GenerateTeamHandler {
     int teamSize;
     Team team;
     Random rand = new Random();
-    //int thinkerCount = 0; //
 
-    public GenerateTeamHandler(ArrayList<Player> playerArray, Map<String, Set<Player>> roleSets,Map<String, Set<Player>> personalitySets,Map<String, Set<Player>> gameSets, int teamSize) {
+    public GenerateTeamHandler(ArrayList<Player> playerArray,
+                               Map<String, Set<Player>> roleSets,
+                               Map<String, Set<Player>> personalitySets,
+                               Map<String, Set<Player>> gameSets,
+                               int teamSize,
+                               int teamId) {
         this.playerArray = playerArray;
         this.roleSets = roleSets;
         this.personalitySets = personalitySets;
         this.gameSets = gameSets;
         this.teamSize = teamSize;
-        team = new Team(teamSize);
 
+        team = new Team(teamSize, teamId);
     }
 
-    public void addFirstTeamPlayer(){
-        // Prioritize Leader, then Thinker, Balanced, Average
+
+    public Team formTeam(){
+        //Add First Team Player (extracted from old addFirstTeamPlayer logic)
         Player firstPlayer = null;
 
         if (!personalitySets.get("leader").isEmpty()) {
-            firstPlayer = personalitySets.get("leader").iterator().next();
+            List<Player> leaderList = new ArrayList<>(personalitySets.get("leader"));
+            firstPlayer = leaderList.get(new Random().nextInt(leaderList.size()));
             personalitySets.get("leader").remove(firstPlayer);
         }
         else if (!personalitySets.get("thinker").isEmpty()) {
-            firstPlayer = personalitySets.get("thinker").iterator().next();
+            List<Player> thinkerList = new ArrayList<>(personalitySets.get("thinker"));
+            firstPlayer = thinkerList.get(new Random().nextInt(thinkerList.size()));
             personalitySets.get("thinker").remove(firstPlayer);
         }
         else if (!personalitySets.get("balanced").isEmpty()) {
-            firstPlayer = personalitySets.get("balanced").iterator().next();
+            List<Player> balancedList = new ArrayList<>(personalitySets.get("balanced"));
+            firstPlayer = balancedList.get(new Random().nextInt(balancedList.size()));
             personalitySets.get("balanced").remove(firstPlayer);
         }
         else if (!personalitySets.get("average").isEmpty()) {
-            firstPlayer = personalitySets.get("average").iterator().next();
+            List<Player> averageList = new ArrayList<>(personalitySets.get("average"));
+            firstPlayer = averageList.get(new Random().nextInt(averageList.size()));
             personalitySets.get("average").remove(firstPlayer);
         }
 
         if (firstPlayer != null) {
             team.addPlayer(firstPlayer);
-            // Increment count if the first player is a thinker
             if ("thinker".equalsIgnoreCase(firstPlayer.getPersonalityType()));
             removeFromAllSets(firstPlayer);
+            playerArray.remove(firstPlayer);
         }
-    }
 
-    public Team fillTeam(){
-        // Identify if a Leader was selected as the first player to enforce a one-leader rule
+        //Fill the rest of the Team
+
+        int thinkerCount;
         boolean hasLeader = team.getTeamList().stream()
                 .anyMatch(p -> "leader".equalsIgnoreCase(p.getPersonalityType()));
 
         while (team.getTeamList().size() < teamSize) {
             HashMap<String, ArrayList<String>> ideal = team.idealFeatures();
-            ArrayList<String> personalityFeatures = new ArrayList<>(ideal.get("personality"));
-
-            // If the team already has a leader, remove 'leader' from the list of desired personality features.
-            if (hasLeader) {
-                personalityFeatures.remove("leader");
-            }
-
-
-
+            thinkerCount = Collections.frequency(ideal.get("personality"), "thinker");
 
             Set<Player> rolesSet = getUnionOfSets2(ideal.get("roles"),  roleSets );
-            Set<Player> personalitySet = getUnionOfSets2(personalityFeatures,  personalitySets );
+            Set<Player> personalitySet = getUnionOfSets2(ideal.get("personality"),  personalitySets );
             Set<Player> gameSet = getUnionOfSets2(ideal.get("games"), gameSets);
 
-            // --- Intersection  3 Selection Logic ---
+            // --- Intersection Logic (3-way, 2-way, 1-way) ---
             Set<Player> candidates = new HashSet<>(rolesSet);
             candidates.retainAll(personalitySet);
             candidates.retainAll(gameSet);
 
-            // Intersection 2 Selection logic
             if (candidates.isEmpty()) {
-                // two-way intersection
+                // 2-way intersection
                 Set<Player> temp;
-                temp = new HashSet<>(rolesSet); temp.retainAll(personalitySet); if (!temp.isEmpty()) candidates.addAll(temp);
-                temp = new HashSet<>(rolesSet); temp.retainAll(gameSet); if (!temp.isEmpty()) candidates.addAll(temp);
-                temp = new HashSet<>(personalitySet); temp.retainAll(gameSet); if (!temp.isEmpty()) candidates.addAll(temp);
+                temp = new HashSet<>(rolesSet); temp.retainAll(personalitySet);
+                if (!temp.isEmpty()) candidates.addAll(temp);
+                temp = new HashSet<>(rolesSet); temp.retainAll(gameSet);
+                if (!temp.isEmpty()) candidates.addAll(temp);
+                temp = new HashSet<>(personalitySet); temp.retainAll(gameSet);
+                if (!temp.isEmpty()) candidates.addAll(temp);
             }
-            //intersection 2 Selection logic
+
             if (candidates.isEmpty()) {
+                // 1-way union
                 candidates.addAll(rolesSet); candidates.addAll(personalitySet); candidates.addAll(gameSet);
+            }
+
+            // --- Personality Filters (Leader/Thinker) ---
+            if (hasLeader) {
+                Set<Player> nonLeaders = new HashSet<>();
+                for (Player p : candidates) {
+                    if (!"leader".equalsIgnoreCase(p.getPersonalityType())) {
+                        nonLeaders.add(p);
+                    }
+                }
+                if (!nonLeaders.isEmpty()) { candidates = nonLeaders; }
+            } else {
+                if (thinkerCount > 2) {
+                    Set<Player> nonThinkers = new HashSet<>();
+                    for (Player p : candidates) {
+                        if (!"thinker".equalsIgnoreCase(p.getPersonalityType())) {
+                            nonThinkers.add(p);
+                        }
+                    }
+                    if (!nonThinkers.isEmpty()) { candidates = nonThinkers; }
+                } else {
+                    Set<Player> nonAverages = new HashSet<>();
+                    for (Player p : candidates) {
+                        if (!"average".equalsIgnoreCase(p.getPersonalityType()) || !"balanced".equalsIgnoreCase(p.getPersonalityType())) {
+                            nonAverages.add(p);
+                        }
+                    }
+                    if (!nonAverages.isEmpty()) { candidates = nonAverages; }
+                }
             }
 
             // --- Skill Balancing Filter ---
             double teamAverage = team.getTeamList().isEmpty()
                     ? 0 : team.getSkillLevel() / (double) team.getTeamList().size();
 
-            double globalAverage = playerArray.stream()
+            double globalAverage;
+
+            globalAverage = playerArray.stream()
                     .mapToInt(Player::getSkillLevel)
                     .average()
                     .orElse(0);
 
             List<Player> candidateList = new ArrayList<>(candidates);
 
-            // If team is already stronger than global average by more than 2,
-            // remove players who are above global average.
             boolean teamTooStrong = teamAverage > globalAverage + 2;
             candidateList.removeIf(p -> teamTooStrong && p.getSkillLevel() > globalAverage);
 
@@ -113,38 +146,37 @@ public class GenerateTeamHandler {
             Player selected = candidateList.get(rand.nextInt(candidateList.size()));
 
             team.addPlayer(selected);
-            //if ("thinker".equalsIgnoreCase(selected.getPersonalityType())) thinkerCount++;
+            if ("thinker".equalsIgnoreCase(selected.getPersonalityType())) thinkerCount++;
+
             removeFromAllSets(selected);
+            playerArray.remove(selected);
         }
         team.viewTeam();
         return team;
     }
 
-    // FIX: Removes the player from their specific set in each category (Role, Personality, Game)
     public void removeFromAllSets(Player player) {
-
-        // Remove from Role Sets
+        //Remove from Role Sets
         String role = player.getPreferredRole().toLowerCase();
         Set<Player> roleSet = roleSets.get(role);
         if (roleSet != null){
             roleSet.remove(player);
         }
 
-        // Remove from Personality Sets
+        //Remove from Personality Sets
         String personality = player.getPersonalityType().toLowerCase();
         Set<Player> personalitySet = personalitySets.get(personality);
         if (personalitySet != null){
             personalitySet.remove(player);
         }
 
-        // Remove from Game Sets
+        //Remove from Game Sets
         String game = player.getPreferredGame().toLowerCase();
         String gameKey = game.equals("csgo") ? "cs:go" : game;
         Set<Player> gameSet = gameSets.get(gameKey);
         if (gameSet != null){
             gameSet.remove(player);
         }
-
     }
 
     public Set<Player> getUnionOfSets2(ArrayList<String> features, Map<String, Set<Player>> CategoryPlayerSets) {
@@ -152,7 +184,7 @@ public class GenerateTeamHandler {
         for (String f : features) {
             String key = f.toLowerCase();
             Set<Player> s;
-            s = CategoryPlayerSets.get("cs:go");
+            s = CategoryPlayerSets.get(f);
             if (s != null) result.addAll(s);
         }
         return result;

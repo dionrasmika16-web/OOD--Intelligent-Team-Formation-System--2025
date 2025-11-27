@@ -16,7 +16,8 @@ public class Team {
     HashMap<String, Integer> personalityType;
     public HashMap<String, Integer> teamRoles;
 
-    public Team(int teamSize) {
+    public Team(int teamSize,int id) {
+        this.id = id;
         this.teamSize = teamSize;
         maxCap = teamSize / 5;
 
@@ -25,10 +26,7 @@ public class Team {
         personalityType = new HashMap<>();
         teamRoles = new HashMap<>();
     }
-
-    // Placeholder for possible polymorphism
-    public void isTeamFull() {
-    }
+    public Team(){};
 
     public void addPlayer(Player player) {
         teamList.add(player);
@@ -46,9 +44,11 @@ public class Team {
                 teamRoles.getOrDefault(player.getPreferredRole(), 0) + 1);
 
         skillOverall += player.getSkillLevel();
+        //System.out.println(preferredGames+"---"+personalityType+"---"+teamRoles);
     }
 
     public HashMap<String, ArrayList<String>> idealFeatures() {
+        //System.out.println(preferredGames+"---"+personalityType+"---"+teamRoles);
         HashMap<String, ArrayList<String>> idealTypes = new HashMap<>();
         ArrayList<String> gameArray = new ArrayList<>();
         ArrayList<String> personalityTypeArray = new ArrayList<>();
@@ -65,7 +65,7 @@ public class Team {
         // Roles
         for (String role : Roles) {
             int count = teamRoles.getOrDefault(role, 0);
-            System.out.println(count+"---"+maxCap);
+            //System.out.println(count+"---"+maxCap);
             if (count < maxCap) {
                 roleArray.add(role);
             }
@@ -73,16 +73,20 @@ public class Team {
 
         // Personality Types
         for (String type : PersonalityTypes) {
+            //System.out.println("-------------"+personalityType.getOrDefault(type,0)+"---"+personalityType);
             int count = personalityType.getOrDefault(type, 0);
 
-            if (type.equals("leader") && count < 1) {
-                personalityTypeArray.add(type);
-            } else if (type.equals("thinker") && count < 2) {
-                personalityTypeArray.add(type);
-            } else if (type.equals("balanced") || type.equals("Average")) {
+            if (type.equals("leader") && count !=1) {
+               // System.out.println("test leader---"+count);
                 personalityTypeArray.add(type);
             }
-            // Removed redundant "if (count < maxCap)" addition
+            if (type.equals("thinker") && count < 2) {
+                personalityTypeArray.add(type);
+                //break;
+            }
+            if (type.equals("balanced") || type.equals("Average")) {
+                personalityTypeArray.add(type);
+            }
         }
 
         idealTypes.put("roles", roleArray);
@@ -117,9 +121,19 @@ public class Team {
         return teamRoles;
     }
 
+    public int getId() {
+        return id;
+    }
+    public void setid(int id) {
+        this.id = id;
+    }
+    public  int getTeamSize() {
+        return teamSize;
+    }
+
     public void viewTeam() {
         for (Player player : teamList) {
-            System.out.println(player.getId() + " ----- " + player.getName() + " ----- " + player.getPersonalityType() + " ----- " + player.getPreferredRole() + " ----- " + player.getPreferredGame()+ " ----- " + skillOverall);
+            System.out.println(this.id+"------------"+player.getId() + " ----- " + player.getName() + " ----- " + player.getPersonalityType() + " ----- " + player.getPreferredRole() + " ----- " + player.getPreferredGame()+ " ----- " + skillOverall);
         }
     }
 }

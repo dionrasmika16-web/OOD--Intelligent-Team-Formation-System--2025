@@ -4,12 +4,13 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 
-public abstract class AbstractFileHandler {
+public abstract class AbstractFileHandler<T> {
 
     private String fileSaveLocation;
     private String fileName;
+    private boolean saveFile=false;
 
-    // Method to open file chooser and return selected CSV file path
+    // mthod to open file chooser and return selected CSV file path
     public String getFileAddress() {
         try {
             // Set system look and feel (makes it look like Windows Explorer)
@@ -49,7 +50,7 @@ public abstract class AbstractFileHandler {
         }
     }
 
-    // Method to open a folder chooser and return selected folder path
+    // method to open a folder chooser and return selected folder path
     public String getFolderAddress() {
         try {
             // Set system look and feel (modern Windows style)
@@ -89,11 +90,27 @@ public abstract class AbstractFileHandler {
         return fileName;
     }
 
-    public abstract List<Player> loadFromFile(String path);
+    public void useSetFileOption(ArrayList<T> items){
+        if(saveFile){
+            saveToFile(items);
+        }else{
+            saveToFolder(items);
+        }
+    }
+    public void setSaveFile(boolean saveToFile) {
+        this.saveFile = saveToFile;
+    }
+    public boolean isSaveFile() {
+        return saveFile;
+    }
 
-    public abstract void saveToFile(String path, ArrayList<Player> players);
 
-    public abstract void saveToFolder(String path, ArrayList<Player> players);
+    public abstract List<T> loadFromFile(String path);
+
+    public abstract void saveToFile( ArrayList<T> items);
+
+    public abstract void saveToFolder(ArrayList<T> players);
+
 
 
 

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class PlayerFileHandler extends AbstractFileHandler {
+public class PlayerFileHandler extends AbstractFileHandler<Player> {
 
     public PlayerFileHandler(String fileName,String path) {
         this.setFileName(fileName);
@@ -28,14 +28,14 @@ public class PlayerFileHandler extends AbstractFileHandler {
                 String[] v = line.split(",");
 
                 Player p = new Player(
-                        v[0],                  //iD
-                        v[1],                  //name
-                        v[2],                  //email
-                        v[3],                  //preferred game
+                        v[0].toLowerCase(),                  //iD
+                        v[1].toLowerCase(),                  //name
+                        v[2].toLowerCase(),                  //email
+                        v[3].toLowerCase(),                  //preferred game
                         Integer.parseInt(v[4]),//Skill level
-                        v[5],                  //preferred role
+                        v[5].toLowerCase(),                  //preferred role
                         Integer.parseInt(v[6]),//personality score
-                        v[7]                  //personality type
+                        v[7].toLowerCase()                  //personality type
                 );
 
                 players.add(p);
@@ -52,12 +52,14 @@ public class PlayerFileHandler extends AbstractFileHandler {
     }
 
     @Override
-    public void saveToFile(String path, ArrayList<Player> players) {
-        try {
-            FileWriter writer = new FileWriter(path, true);//Appends to File
-
-            //writer.write("SurveyID,Name,Email,PreferredGame,SkillLevel,PreferredRole,TotalScore,PersonalityType\n");
-
+    public synchronized void saveToFile(ArrayList<Player> players) {
+        String path=this.getFileSaveLocation();
+        try (FileWriter writer = new FileWriter(path, true)) { // append mode
+            File file = new File(path);
+            // Write header only if file is new
+            if (file.length() == 0) {
+                writer.write("ID,Name,Email,PreferredGame,SkillLevel,PreferredRole,TotalScore,PersonalityType\n");
+            }
             for (Player p : players) {
                 writer.write(
                         p.getId() + "," +
@@ -71,8 +73,7 @@ public class PlayerFileHandler extends AbstractFileHandler {
                 );
             }
 
-            writer.close();
-            System.out.println("✔ Saved to CSV!");
+            System.out.println("[File Handler] ✔ Saved to CSV at: " + path);
 
         } catch (IOException e) {
             System.out.println("Error writing file.");
@@ -81,20 +82,23 @@ public class PlayerFileHandler extends AbstractFileHandler {
     }
 
     @Override
-    public void saveToFolder(String folderPath, ArrayList<Player> players) {
+    public synchronized void saveToFolder(ArrayList<Player> players) {
+        // Creates a address by adding file location and filename
+        String folderPath =this.getFileSaveLocation();
         String fileName = this.getFileName();
         File folder = new File(folderPath);
 
-        // Create folder if it doesn't exist
+        // creates folder if it doesn't exist
         if (!folder.exists()) {
             folder.mkdirs();
         }
 
-        String path = folderPath + File.separator + fileName;
+        String path = folderPath + File.separator + fileName+".csv";
 
-        try (FileWriter writer = new FileWriter(path, true)) { // append mode
+        // The entire block is synchronized, ensuring only one thread writes to the file at a time
+        try (FileWriter writer = new FileWriter(path, false)) { // append mode
             File file = new File(path);
-            // Write header only if file is new
+            // writes header only if file is new, another check just in case another file with the same name exists in the directory
             if (file.length() == 0) {
                 writer.write("SurveyID,Name,Email,PreferredGame,SkillLevel,PreferredRole,TotalScore,PersonalityType\n");
             }
@@ -111,14 +115,14 @@ public class PlayerFileHandler extends AbstractFileHandler {
                 );
             }
 
-            System.out.println("✔ Saved to CSV at: " + path);
+            System.out.println("[File Handler] ✔ Saved to CSV at: " + path);
 
         } catch (IOException e) {
             System.out.println("Error writing file.");
             e.printStackTrace();
         }
-
     }
+
 
 
 

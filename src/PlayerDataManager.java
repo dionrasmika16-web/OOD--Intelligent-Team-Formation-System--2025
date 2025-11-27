@@ -31,10 +31,6 @@ public class PlayerDataManager {
         return AllPlayers;
     }
 
-    //public List<Player> getAllPlayers() {
-        //return players;
-    //}
-
     public int getNextId() {
         return surveyIdCounter;
     }
