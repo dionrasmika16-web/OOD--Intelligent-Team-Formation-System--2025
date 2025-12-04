@@ -1,13 +1,13 @@
 import java.util.*;
 
 public class GenerateTeamHandler {
-    Map<String, Set<Player>> roleSets;
-    Map<String, Set<Player>> personalitySets;
-    Map<String, Set<Player>> gameSets;
-    ArrayList<Player> playerArray;
-    int teamSize;
-    Team team;
-    Random rand = new Random();
+    private Map<String, Set<Player>> roleSets;
+    private Map<String, Set<Player>> personalitySets;
+    private Map<String, Set<Player>> gameSets;
+    private ArrayList<Player> playerArray;
+    private int teamSize;
+    private Team team;
+    private Random rand = new Random();
 
     public GenerateTeamHandler(ArrayList<Player> playerArray,
                                Map<String, Set<Player>> roleSets,
@@ -151,7 +151,7 @@ public class GenerateTeamHandler {
             removeFromAllSets(selected);
             playerArray.remove(selected);
         }
-        team.viewTeam();
+        //team.viewTeam();
         return team;
     }
 
@@ -182,7 +182,6 @@ public class GenerateTeamHandler {
     public Set<Player> getUnionOfSets2(ArrayList<String> features, Map<String, Set<Player>> CategoryPlayerSets) {
         Set<Player> result = new HashSet<>();
         for (String f : features) {
-            String key = f.toLowerCase();
             Set<Player> s;
             s = CategoryPlayerSets.get(f);
             if (s != null) result.addAll(s);

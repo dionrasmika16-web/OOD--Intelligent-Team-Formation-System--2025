@@ -11,7 +11,7 @@ public abstract class AbstractFileHandler<T> {
     private boolean saveFile=false;
 
     // mthod to open file chooser and return selected CSV file path
-    public String getFileAddress() {
+    public final String getFileAddress() {
         try {
             // Set system look and feel (makes it look like Windows Explorer)
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -19,88 +19,99 @@ public abstract class AbstractFileHandler<T> {
             System.out.println("Failed to set system look and feel: " + e.getMessage());
         }
 
-        JFrame frame = new JFrame();
-        frame.setAlwaysOnTop(true); // Bring dialog to front
+        try{
 
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Select a CSV File");
+            JFrame frame = new JFrame();
+            frame.setAlwaysOnTop(true); // Bring dialog to front
 
-        // Filter for CSV files only
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV Files", "csv");
-        fileChooser.setFileFilter(filter);
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Select a CSV File");
 
-        // Only allow single file selection
-        fileChooser.setMultiSelectionEnabled(false);
+            // Filter for CSV files only
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV Files", "csv");
+            fileChooser.setFileFilter(filter);
 
-        int result = fileChooser.showOpenDialog(frame);
+            // Only allow single file selection
+            fileChooser.setMultiSelectionEnabled(false);
 
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            if (selectedFile.getName().toLowerCase().endsWith(".csv")) {
-                return selectedFile.getAbsolutePath();
+            int result = fileChooser.showOpenDialog(frame);
+
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                if (selectedFile.getName().toLowerCase().endsWith(".csv")) {
+                    return selectedFile.getAbsolutePath();
+                } else {
+                    JOptionPane.showMessageDialog(frame,
+                            "Please select a valid CSV file.",
+                            "Invalid File",
+                            JOptionPane.ERROR_MESSAGE);
+                    return null;
+                }
             } else {
-                JOptionPane.showMessageDialog(frame,
-                        "Please select a valid CSV file.",
-                        "Invalid File",
-                        JOptionPane.ERROR_MESSAGE);
-                return null;
+                return null; // No file selected
             }
-        } else {
-            return null; // No file selected
+        }catch(Exception e){
+            System.out.println("Error occurred choosing file");
+            return null;
         }
     }
 
     // method to open a folder chooser and return selected folder path
-    public String getFolderAddress() {
+    public final String getFolderAddress() {
         try {
             // Set system look and feel (modern Windows style)
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             System.out.println("Failed to set system look and feel: " + e.getMessage());
         }
+        try {
 
-        JFrame frame = new JFrame();
-        frame.setAlwaysOnTop(true); // Bring dialog to front
+            JFrame frame = new JFrame();
+            frame.setAlwaysOnTop(true); // Bring dialog to front
 
-        JFileChooser folderChooser = new JFileChooser();
-        folderChooser.setDialogTitle("Select a Folder to Save");
-        folderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY); // Only folders
-        folderChooser.setAcceptAllFileFilterUsed(false); // Disable "All files" option
+            JFileChooser folderChooser = new JFileChooser();
+            folderChooser.setDialogTitle("Select a Folder to Save");
+            folderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY); // Only folders
+            folderChooser.setAcceptAllFileFilterUsed(false); // Disable "All files" option
 
-        int result = folderChooser.showSaveDialog(frame);
+            int result = folderChooser.showSaveDialog(frame);
 
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File selectedFolder = folderChooser.getSelectedFile();
-            return selectedFolder.getAbsolutePath();
-        } else {
-            return null; // No folder selected
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFolder = folderChooser.getSelectedFile();
+                return selectedFolder.getAbsolutePath();
+            } else {
+                return null; // No folder selected
+            }
+        }catch(Exception e){
+            System.out.println("Error occurred choosing folder directory");
+            return null;
         }
     }
 
-    public void setFileSaveLocation(String fileSaveLocation) {
+    public final void setFileSaveLocation(String fileSaveLocation) {
         this.fileSaveLocation = fileSaveLocation;
     }
-    public String getFileSaveLocation() {
+    public final String getFileSaveLocation() {
         return fileSaveLocation;
     }
-    public void setFileName(String fileName) {
+    public final void setFileName(String fileName) {
         this.fileName = fileName;
     }
-    public String getFileName() {
+    public final String getFileName() {
         return fileName;
     }
 
-    public void useSetFileOption(ArrayList<T> items){
+    public final void useSetFileOption(ArrayList<T> items){
         if(saveFile){
             saveToFile(items);
         }else{
             saveToFolder(items);
         }
     }
-    public void setSaveFile(boolean saveToFile) {
+    public final void setSaveFile(boolean saveToFile) {
         this.saveFile = saveToFile;
     }
-    public boolean isSaveFile() {
+    public final boolean isSaveFile() {
         return saveFile;
     }
 

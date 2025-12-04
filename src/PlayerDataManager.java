@@ -34,4 +34,10 @@ public class PlayerDataManager {
     public int getNextId() {
         return surveyIdCounter;
     }
+
+    public void clearAllPlayers() {
+        AllPlayers.clear();
+        Fileplayers.clear();
+        Surveyplayers.clear();
+    }
 }

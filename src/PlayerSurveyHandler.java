@@ -1,11 +1,35 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
-public class PlayerSurveyHandler {
+public class PlayerSurveyHandler extends AbstractWorkFlow<Player>{
 
     private Scanner input = new Scanner(System.in);
-    private int nextId=0;
+    private int nextId=001;
+
+
+    //WorkFlow Template Methods
+
+    @Override
+    protected  void process(){
+        this.result= conductSurvey();
+
+    }
+
+    @Override
+    public void save(PlayerFileHandler playerFileHandler) {
+        ArrayList<Player> surveylist = new ArrayList<>();
+        surveylist.add(result);
+        playerFileHandler.useSetFileOption(surveylist);
+    }
+
+    public void save(TeamFileHandler teamFileHandler) {
+        //Empty
+    }
+
+
+
 
     // --- Validation Methods---
     private int getValidatedInt(String question, int min, int max) {
@@ -74,7 +98,7 @@ public class PlayerSurveyHandler {
 
         System.out.println("Take the Personality Test!");
 
-        //Personality Questions
+        //Personality Question
         int q1 = getValidatedInt("1. I enjoy taking leadership: ", 1, 5);
         int q2 = getValidatedInt("2. I prefer strategy thinking: ", 1, 5);
         int q3 = getValidatedInt("3. I enjoy teamwork: ", 1, 5);
@@ -91,14 +115,14 @@ public class PlayerSurveyHandler {
         else personalityType = "Average";
 
         //Preferred Roles and Games
-        List<String> roles = Arrays.asList("STRATEGIST", "ATTACKER", "THINKER", "DEFENDER", "SUPPORTER", "COORDINATOR");
+        List<String> roles = Arrays.asList("STRATEGIST", "ATTACKER", "DEFENDER", "SUPPORTER", "COORDINATOR");
         String preferredRole = getValidatedChoice("Enter Preferred Role: " + roles +" ", roles);
 
         List<String> games = Arrays.asList("VALORANT", "DOTA2", "FIFA", "BASKETBALL", "BADMINTON", "CHESS");
         String preferredGame = getValidatedChoice("Enter Preferred Game: " + games +" ", games);
 
         // create player object
-        return new Player(String.valueOf(++nextId), name, email, preferredGame, skillLevel, preferredRole, total, personalityType);
+        return new Player("p"+ ++nextId, name, email, preferredGame, skillLevel, preferredRole, total, personalityType);
     }
 
 }

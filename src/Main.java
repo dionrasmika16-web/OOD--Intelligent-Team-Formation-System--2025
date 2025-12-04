@@ -3,6 +3,8 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
@@ -12,9 +14,9 @@ public class Main {
         final PlayerDataManager playerDataManager = new PlayerDataManager();
 
         //Enters default Participant file path Save Location and File Name;
-        final PlayerFileHandler playerFileHandler = new PlayerFileHandler("Test", "C:\\Users\\Extra\\Desktop\\lastjavatut");
-        final TeamFileHandler teamFileHandler=new TeamFileHandler("TeamSave", "C:\\Users\\Extra\\Desktop\\lastjavatut");
-        TeamDataManager teamDataManager = new TeamDataManager();
+        final PlayerFileHandler playerFileHandler = new PlayerFileHandler("PlayerFile-"+main.DateTimeStringExample(), "C:\\Users\\Extra\\Desktop\\lastjavatut");
+        final TeamFileHandler teamFileHandler=new TeamFileHandler("Team-File-"+main.DateTimeStringExample(), "C:\\Users\\Extra\\Desktop\\lastjavatut");
+
 
         while (true) {
             System.out.println("--------------Intelligent Team Formation System-----------------------");
@@ -36,22 +38,19 @@ public class Main {
                     PlayerSurveyHandler playerSurveyHandler = new PlayerSurveyHandler();
                     ExecutorService executor = Executors.newSingleThreadExecutor();
 
-                    // --- Execute Survey Concurrently ---
-                    // 1. Create the task
+                    // ---Execute Survey Concurrently-----
+                    // 1 Create task
                     Runnable surveyTask = new SurveyProcessor(
-                            playerSurveyHandler,
-                            playerFileHandler,
-                            playerDataManager // Use the method you want to call for saving
+                            playerSurveyHandler,//Takes survey
+                            playerDataManager,//Saves player data
+                            playerFileHandler//Saves player to file
                     );
 
-                    // 2. Submit the task
+                    // 2 Submit the task
                     executor.submit(surveyTask);
 
-                    System.out.println("-- Main Thread ---");
-                    System.out.println("Main thread is NOT blocked. It continues while user fills out survey.");
 
-
-                    // 3. Shut down the executor
+                    // 3 Shut down the executor
                     executor.shutdown();
                     try {
                         // Wait for the survey task to finish execution (up to 5 minutes)
@@ -64,17 +63,23 @@ public class Main {
                         Thread.currentThread().interrupt();
                     }
 
-                    System.out.println("\n--- Main Thread Finished ---");
                     break;
 
                 case "UP":
+                    //Opens a gui to take file address
                     String uploadFileLocation=playerFileHandler.getFileAddress();
-                    playerDataManager.addFilePlayers(playerFileHandler.loadFromFile(uploadFileLocation));
-                    System.out.println("File Successfully Uploaded!");
+                    if (uploadFileLocation ==null){
+                        System.out.println("Error occured opening file");
+                    }else {
+                        //loads the data in the file to playerDataManager(ArrayList)
+                        playerDataManager.addFilePlayers(playerFileHandler.loadFromFile(uploadFileLocation));
+                        System.out.println("File Successfully Uploaded!");
+                    }
                     break;
 
                 case "FT":
-                    playerDataManager.addFilePlayers(playerFileHandler.loadFromFile("C:\\Users\\Extra\\Desktop\\CM1601 VIVA\\Starter pack\\Starter pack\\participants_sample.csv"));
+                    //playerDataManager.addFilePlayers(playerFileHandler.loadFromFile("C:\\Users\\Extra\\Desktop\\CM1601 VIVA\\Starter pack\\Starter pack\\participants_sample.csv"));
+                    //System.out.println("players---"+playerDataManager.getAllPlayers().size());
                     if(!playerDataManager.getAllPlayers().isEmpty()){
 
                         boolean gotTeamSize=false;
@@ -109,20 +114,33 @@ public class Main {
 
                             }
                         }
+                        ArrayList<Player> playerListForSetupHandler = new ArrayList<>(playerDataManager.getAllPlayers());
 
-                        GenerateTeamSetupHandler setupHandler = new GenerateTeamSetupHandler(playerDataManager.getAllPlayers(), intTeamSize);
+                        GenerateTeamSetupHandler setupHandler = new GenerateTeamSetupHandler(playerListForSetupHandler,intTeamSize,numberOfTeamsToMake);
 
-                        // 2. Execute Concurrent Generation
-                        System.out.println("Starting concurrent team generation...");
-                        setupHandler.formMultipleTeams(numberOfTeamsToMake);
-                        System.out.println("Concurrent generation finished.");
 
-                        // 3. Access the Data Manager and Retrieve Teams
-                        TeamDataManager dataManager = setupHandler.teamDataManager;
-                        teamDataManager=setupHandler.teamDataManager;
-                        teamFileHandler.useSetFileOption(dataManager.getTeamArray());
+                        // Execute Concurrent
+                        setupHandler.startWorkFlow(teamFileHandler);
 
-                        //dataManager.viewTeam();
+
+                        //Access the Data Manager and Retrieve Teams
+                        TeamDataManager dataManager = setupHandler.getTeamDataManager();
+
+                        boolean clearPlayerFlag=false;
+                        while (!clearPlayerFlag) {
+                            System.out.println("Would you like to clear the players from the system memory for the next team formation(Y/N): ");
+                            String clearPlayers= main.getNonEmptyString("Enter your choice: ");
+                            if(clearPlayers.toUpperCase().equals("Y")){
+                                playerDataManager.clearAllPlayers();
+                                System.out.println("Clearing all players from the system memory...");
+                                clearPlayerFlag=true;
+                            } else if(clearPlayers.toUpperCase().equals("N")){
+                                clearPlayerFlag=true;
+                            } else{
+                                System.out.println("Enter Y or N: ");
+                            }
+                        }
+
 
                     }else{
                         System.out.println("There are no players added to create Teams.");
@@ -134,12 +152,21 @@ public class Main {
                 case "VT":
                     System.out.println("-----------------Team View-----------------");
                     TeamDataManager viewTeamDataManager = new TeamDataManager();
-                    viewTeamDataManager.setTeamArray(teamFileHandler.loadFromFile(teamFileHandler.getFileAddress()));
+                    //Gets Teams File Address
+                    String uploadTeamFileLocation=teamFileHandler.getFileAddress();
+                    if (uploadTeamFileLocation ==null){
+                        System.out.println("Error occured opening file");
+                    }else {
+                        //Loads the teams to teamDataManager
+                        viewTeamDataManager.setTeamArray(teamFileHandler.loadFromFile(uploadTeamFileLocation));
+                        System.out.println("File Successfully Uploaded!");
+                    }
                     viewTeamDataManager.viewTeam();
                     break;
 
 
                 case "SFS":
+                    //CHanges file save setting in either teams or players to a preferred folder(directory) or file
                     System.out.println("--------------Save File Settings-----------------------");
                     System.out.println("│ " + "Change Participant File Save(CPFS)" + " │ " + "Change Team File Save(CTFS)" + " │ ");
 
@@ -173,12 +200,25 @@ public class Main {
 
                             switch (cpfssChoice.toUpperCase()) {
                                 case "FILE":
-                                    playerFileHandler.setFileSaveLocation(playerFileHandler.getFileAddress());
-                                    playerFileHandler.setSaveFile(true);
-                                    System.out.println("File Save Address Successfully Changed!");
+
+                                    String uploadfileLocation=playerFileHandler.getFileAddress();
+                                    if (uploadfileLocation ==null){
+                                        System.out.println("Error occured opening file");
+                                    }else {
+                                        playerFileHandler.setFileSaveLocation(uploadfileLocation);
+                                        playerFileHandler.setSaveFile(true);
+                                        System.out.println("File Successfully Uploaded!");
+                                    }
                                     break;
                                 case "FOLDER":
-                                    playerFileHandler.setFileSaveLocation(playerFileHandler.getFolderAddress());
+
+                                    String uploadfolderLocation=playerFileHandler.getFolderAddress();
+                                    if (uploadfolderLocation ==null){
+                                        System.out.println("Error occured opening file");
+                                    }else {
+                                        playerFileHandler.setFileSaveLocation(uploadfolderLocation);
+                                        System.out.println("Folder location Successfully Uploaded!");
+                                    }
                                     //System.out.println("Enter the name of the File to be saved as: ");
 
                                     String fileName1 = main.getNonEmptyString("Enter the name of the File to be saved as: ");
@@ -211,13 +251,23 @@ public class Main {
 
                             switch (ctfssChoice.toUpperCase()) {
                                 case "FILE":
-                                    teamFileHandler.setFileSaveLocation(playerFileHandler.getFileAddress());
-                                    teamFileHandler.setSaveFile(true);
-                                    System.out.println("File Save Address Successfully Changed!");
+                                    String uploadteamfileLocation=teamFileHandler.getFileAddress();
+                                    if (uploadteamfileLocation ==null){
+                                        System.out.println("Error occured opening file");
+                                    }else {
+                                        teamFileHandler.setFileSaveLocation(uploadteamfileLocation);
+                                        teamFileHandler.setSaveFile(true);
+                                        System.out.println("File Successfully Uploaded!");
+                                    }
                                     break;
                                 case "FOLDER":
-                                    teamFileHandler.setFileSaveLocation(playerFileHandler.getFolderAddress());
-                                    //System.out.println("Enter the name of the File to be saved as: ");
+                                    String uploadteamfolderLocation=teamFileHandler.getFolderAddress();
+                                    if (uploadteamfolderLocation ==null){
+                                        System.out.println("Error occured opening file");
+                                    }else {
+                                        teamFileHandler.setFileSaveLocation(uploadteamfolderLocation);
+                                        System.out.println("Folder location Successfully Uploaded!");
+                                    }
 
                                     String teamFileName = main.getNonEmptyString("Enter the name of the File to be saved as: ");
 
@@ -263,5 +313,20 @@ public class Main {
 
             System.out.println("Choice cannot be empty!");
         }
+    }
+
+    private String DateTimeStringExample() {
+            // Get current date and time
+            LocalDateTime now = LocalDateTime.now();
+
+            // Define a formatter for the date-time string
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+
+            // Format the date-time
+            String dateTimeString = now.format(formatter);
+
+            return dateTimeString;
+
+
     }
 }

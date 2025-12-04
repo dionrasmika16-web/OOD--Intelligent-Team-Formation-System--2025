@@ -4,59 +4,83 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class GenerateTeamSetupHandler {
+public class GenerateTeamSetupHandler extends AbstractWorkFlow<TeamDataManager>{
 
     // ------------------- Team ID Management ----------------------
     private static final Object ID_LOCK = new Object();
     private static int nextTeamId = 1;
+    // -------------------------------------------------------------
 
-    /**
-     * Safely retrieves and increments the unique Team ID across all threads.
-     */
+    private ArrayList<Player> playerArray;
+    private int teamSize;
+    private final TeamDataManager teamDataManager;
+    private int numberOfTeams;
+
+    //-------------------------------Features-------------------------------
+    private Map<String, Set<Player>> roleSets;
+    private Map<String, Set<Player>> personalitySets;
+    private Map<String, Set<Player>> gameSets;
+
+    //-------------------------------Specific Features(Sets that are going to be used for feature selection using Intersection Function )-----------------------
+    private Set<Player> attacker = new HashSet<>();
+    private Set<Player> defender = new HashSet<>();
+    private Set<Player> supporter = new HashSet<>();
+    private Set<Player> coordinator = new HashSet<>();
+    private Set<Player> strategist = new HashSet<>();
+
+    private Set<Player> leader = new HashSet<>();
+    private Set<Player> thinker = new HashSet<>();
+    private Set<Player> balanced = new HashSet<>();
+    private Set<Player> average = new HashSet<>();
+
+    private Set<Player> chess = new HashSet<>();
+    private Set<Player> fifa = new HashSet<>();
+    private  Set<Player> basketball = new HashSet<>();
+    private Set<Player> dota2 = new HashSet<>();
+    private Set<Player> csgo = new HashSet<>();
+    private Set<Player> valorant = new HashSet<>();
+
+
+
     public static int getNextTeamId() {
         synchronized (ID_LOCK) {
             return nextTeamId++;
         }
     }
-    // -------------------------------------------------------------
 
-    ArrayList<Player> playerArray;
-    int teamSize;
-    TeamDataManager teamDataManager;
+    @Override
+    protected void process(){
+        this.result= formMultipleTeams();
 
-    //-------------------------------Features-------------------------------
-    Map<String, Set<Player>> roleSets;
-    Map<String, Set<Player>> personalitySets;
-    Map<String, Set<Player>> gameSets;
+    }
 
-    //-------------------------------Specific Features-----------------------
-    Set<Player> attacker = new HashSet<>();
-    Set<Player> defender = new HashSet<>();
-    Set<Player> supporter = new HashSet<>();
-    Set<Player> coordinator = new HashSet<>();
-    Set<Player> strategist = new HashSet<>();
+    @Override
+    public void save(TeamFileHandler teamFileHandler) {
+        System.out.println("-----------------------------------");
 
-    Set<Player> leader = new HashSet<>();
-    Set<Player> thinker = new HashSet<>();
-    Set<Player> balanced = new HashSet<>();
-    Set<Player> average = new HashSet<>();
+    }
 
-    Set<Player> chess = new HashSet<>();
-    Set<Player> fifa = new HashSet<>();
-    Set<Player> basketball = new HashSet<>();
-    Set<Player> dota2 = new HashSet<>();
-    Set<Player> csgo = new HashSet<>();
-    Set<Player> valorant = new HashSet<>();
+    public void save(PlayerFileHandler playerFileHandler) {
+        //empty
+    }
 
-    public GenerateTeamSetupHandler(ArrayList<Player> playerArray, int teamSize) {
+
+    public GenerateTeamSetupHandler(ArrayList<Player> playerArray,int teamSize,int numberOfTeams) {
         this.playerArray = playerArray;
         this.teamSize = teamSize;
         this.teamDataManager = new TeamDataManager();
+        this.numberOfTeams = numberOfTeams;
+        nextTeamId=1;
 
         addPlayersToFeatureSets();
     }
 
+    public TeamDataManager getTeamDataManager(){
+        return teamDataManager;
+    }
+
     public void addPlayersToFeatureSets(){
+        // adds players to their respective features
         for (Player p : playerArray) {
 
             switch (p.getPreferredRole().toLowerCase()) {
@@ -94,15 +118,8 @@ public class GenerateTeamSetupHandler {
     }
 
 
-    public TeamDataManager formTeam(){
-        GenerateTeamHandler generateTeamHandler = new GenerateTeamHandler(playerArray, roleSets, personalitySets, gameSets, teamSize, getNextTeamId());
-        teamDataManager.addTeam(generateTeamHandler.formTeam());
-        return teamDataManager;
-    }
-
-
-    public void formMultipleTeams(int numberOfTeams) {
-        // Create a fixed-size thread pool
+    public TeamDataManager formMultipleTeams() {
+        // Create a fixed size thread pool
         int poolSize = Math.min(numberOfTeams, Runtime.getRuntime().availableProcessors());
         ExecutorService executor = Executors.newFixedThreadPool(poolSize);
         List<Future<?>> futures = new ArrayList<>();
@@ -138,6 +155,6 @@ public class GenerateTeamSetupHandler {
 
         // closes the executor service
         executor.shutdown();
-        System.out.println(numberOfTeams + " teams have been generated concurrently.");
+        return teamDataManager;
     }
 }

@@ -24,7 +24,7 @@ public class TeamDataManager {
 
         for (Team team : teamArray) {
             System.out.println('┌'+"─".repeat(51)+'┬'+"─".repeat(61)+"┬"+"─".repeat(51)+'┐');
-            System.out.println('│'+center("Team ID: "+team.getId(),51)+'│'+center("Team Size: "+ team.teamSize,61)+'│'+center("Team Skill: "+ team.skillOverall,51)+'│');
+            System.out.println('│'+center("Team ID: "+team.getId(),51)+'│'+center("Team Size: "+ team.getTeamSize(),61)+'│'+center("Team Skill: "+ team.getSkillLevel(),51)+'│');
             System.out.println('├'+"─".repeat(20)+'┬'+"─".repeat(30)+'┼'+"─".repeat(30)+"┬"+"─".repeat(30)+"┼"+"─".repeat(30)+"┬"+"─".repeat(20)+'┤');
             System.out.println('│'+center("Player ID : ",20)+'│'+center("Player Name: ",30)+'│'+center("Player Personality Type : ",30)+'│'+center("Player Preferred Game: ",30)+'│'+center("Player Preferred Role : ",30)+'│'+center("Player Skill: ",20)+'│');
             for(Player player : team.getTeamList()){
@@ -42,7 +42,7 @@ public class TeamDataManager {
 
 
     }
-    public  String center(String text, int width) {
+    private  String center(String text, int width) {
         if (text == null || width <= text.length()) {
             return text;
         }

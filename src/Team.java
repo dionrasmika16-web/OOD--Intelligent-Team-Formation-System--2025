@@ -2,19 +2,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Team {
-    int id;
-    int teamSize;
-    int maxCap;
-    int skillOverall = 0;
+    private int id;
+    private int teamSize;
+    private int maxCap;
+    private int skillOverall = 0;
 
-    String[] Roles = {"attacker", "defender", "coordinator", "supporter", "strategist"};
-    String[] PersonalityTypes = {"leader", "thinker", "balanced", "Average"};
-    String[] games = {"chess", "valorant", "basketball", "dota2", "fifa", "cs:go"};
+    private String[] Roles = {"attacker", "defender", "coordinator", "supporter", "strategist"};
+    private String[] PersonalityTypes = {"leader", "thinker", "balanced", "Average"};
+    private String[] games = {"chess", "valorant", "basketball", "dota2", "fifa", "cs:go"};
 
-    ArrayList<Player> teamList;
-    HashMap<String, Integer> preferredGames;
-    HashMap<String, Integer> personalityType;
-    public HashMap<String, Integer> teamRoles;
+    private ArrayList<Player> teamList;
+    private HashMap<String, Integer> preferredGames;
+    private HashMap<String, Integer> personalityType;
+    private HashMap<String, Integer> teamRoles;
 
     public Team(int teamSize,int id) {
         this.id = id;
