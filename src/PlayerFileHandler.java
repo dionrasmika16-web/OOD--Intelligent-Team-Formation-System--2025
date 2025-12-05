@@ -18,6 +18,7 @@ public class PlayerFileHandler extends AbstractFileHandler<Player> {
     public ArrayList<Player> loadFromFile(String path) {
         ArrayList<Player> players = new ArrayList<>();
         File file;
+        boolean noError=true;
         try{
             file = new File(path);
         }catch(Exception e){
@@ -49,6 +50,7 @@ public class PlayerFileHandler extends AbstractFileHandler<Player> {
                 // Add error handling for corrupted data (checking array length)
                 if (v.length < 8) {
                     System.out.println("Skipping corrupted line (insufficient data): " + line);
+                    noError=false;
                     continue; // Skip this line and move to the next
                 }
 
@@ -67,6 +69,8 @@ public class PlayerFileHandler extends AbstractFileHandler<Player> {
                     players.add(p);
                 } catch (NumberFormatException nfe) {
                     System.out.println("Skipping line due to invalid number format (SkillLevel or TotalScore): " + line);
+                    noError=false;
+
                 }
             }
 
@@ -76,6 +80,9 @@ public class PlayerFileHandler extends AbstractFileHandler<Player> {
         } catch (Exception e) {
             System.out.println("An unexpected error occurred while reading CSV file: " + path);
             e.printStackTrace();
+        }
+        if (noError) {
+            System.out.println("File Successfully Uploaded!");
         }
 
         return players;

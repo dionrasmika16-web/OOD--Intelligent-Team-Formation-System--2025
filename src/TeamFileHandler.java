@@ -18,18 +18,18 @@ public class TeamFileHandler extends AbstractFileHandler<Team> {
     @Override
     public ArrayList<Team> loadFromFile(String path) {
         TeamDataManager teamDataManager = new TeamDataManager();
-
+        boolean noError=true;
         File file = new File(path);
 
         //Check if the file exists
         if (!file.exists()) {
-            System.err.println("Error: Team file not found at path: " + path);
+            System.out.println("Error: Team file not found at path: " + path);
             return teamDataManager.getTeamArray(); // Return empty list
         }
 
         // Check if the file is readable
         if (!file.canRead()) {
-            System.err.println("Error: Cannot read team file. Check file permissions: " + path);
+            System.out.println("Error: Cannot read team file. Check file permissions: " + path);
             return teamDataManager.getTeamArray();
         }
 
@@ -52,6 +52,7 @@ public class TeamFileHandler extends AbstractFileHandler<Team> {
                 //Basic Data Integrity (TeamID and TeamSize)
                 if (values.length < minFields) {
                     System.out.println("Skipping corrupted line " + lineNumber + " (insufficient Team ID/Size data): " + line);
+                    noError=false;
                 }
 
                 int teamSize;
@@ -63,6 +64,7 @@ public class TeamFileHandler extends AbstractFileHandler<Team> {
                     teamId = Integer.parseInt(values[1]);
                 } catch (NumberFormatException nfe) {
                     System.out.println("Skipping line " + lineNumber + " due to invalid number format for TeamSize or TeamID: " + line);
+                    noError=false;
                     continue;
                 }
 
@@ -80,6 +82,7 @@ public class TeamFileHandler extends AbstractFileHandler<Team> {
 
                     if (startIndex + fieldsPerPlayer > values.length) {
                         System.out.println("Error on line " + lineNumber + ": Insufficient player data for Team ID " + teamId + ". Stopping processing this team.");
+                        noError=false;
                         break;
                     }
 
@@ -98,6 +101,7 @@ public class TeamFileHandler extends AbstractFileHandler<Team> {
                         t.addPlayer(p);
                     } catch (NumberFormatException nfe) {
                         System.err.println("Skipping player data in line " + lineNumber + " due to invalid number format (SkillLevel/Score).");
+                        noError=false;
                         // If a single player is corrupted, we skip the player but keep the rest of the team data.
                     }
 
@@ -111,6 +115,9 @@ public class TeamFileHandler extends AbstractFileHandler<Team> {
         } catch (Exception e) {
             System.out.println("An unexpected error occurred while reading team CSV file: " + path);
             e.printStackTrace();
+        }
+        if (noError) {
+            System.out.println("File Successfully Uploaded!");
         }
 
         return teamDataManager.getTeamArray();

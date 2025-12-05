@@ -56,7 +56,7 @@ public class GenerateTeamSetupHandler extends AbstractWorkFlow<TeamDataManager>{
 
     @Override
     public void save(TeamFileHandler teamFileHandler) {
-        System.out.println("-----------------------------------");
+        teamFileHandler.useSetFileOption(teamDataManager.getTeamArray());
 
     }
 

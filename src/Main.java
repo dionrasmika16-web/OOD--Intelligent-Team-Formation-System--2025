@@ -55,7 +55,7 @@ public class Main {
                     try {
                         // Wait for the survey task to finish execution (up to 5 minutes)
                         if (!executor.awaitTermination(5, TimeUnit.MINUTES)) {
-                            System.err.println("Executor timeout. Forcing shutdown.");
+                            System.out.println("Executor timeout. Forcing shutdown.");
                             executor.shutdownNow();
                         }
                     } catch (InterruptedException e) {
@@ -72,9 +72,7 @@ public class Main {
                         System.out.println("Error occured opening file");
                     }else {
                         //loads the data in the file to playerDataManager(ArrayList)
-                        playerDataManager.addFilePlayers(playerFileHandler.loadFromFile(uploadFileLocation));
-                        System.out.println("File Successfully Uploaded!");
-                    }
+                        playerDataManager.addFilePlayers(playerFileHandler.loadFromFile(uploadFileLocation));}
                     break;
 
                 case "FT":
@@ -125,6 +123,7 @@ public class Main {
 
                         //Access the Data Manager and Retrieve Teams
                         TeamDataManager dataManager = setupHandler.getTeamDataManager();
+                        System.out.println("Teams Formation Complete and saved at set Location!");
 
                         boolean clearPlayerFlag=false;
                         while (!clearPlayerFlag) {
@@ -159,7 +158,6 @@ public class Main {
                     }else {
                         //Loads the teams to teamDataManager
                         viewTeamDataManager.setTeamArray(teamFileHandler.loadFromFile(uploadTeamFileLocation));
-                        System.out.println("File Successfully Uploaded!");
                     }
                     viewTeamDataManager.viewTeam();
                     break;
@@ -168,13 +166,13 @@ public class Main {
                 case "SFS":
                     //CHanges file save setting in either teams or players to a preferred folder(directory) or file
                     System.out.println("--------------Save File Settings-----------------------");
-                    System.out.println("│ " + "Change Participant File Save(CPFS)" + " │ " + "Change Team File Save(CTFS)" + " │ ");
+                    System.out.println("│ " + "Change Participant File Save(P)" + " │ " + "Change Team File Save(T)" + " │ ");
 
                     boolean saveFileChoice=false;
                     String sfsChoice="";
                     while (!saveFileChoice) {
                         sfsChoice = main.getNonEmptyString("Enter your Save File Setting choice: ");
-                        if (sfsChoice.equalsIgnoreCase("CPFS") || sfsChoice.equalsIgnoreCase("CTFS")) {
+                        if (sfsChoice.equalsIgnoreCase("P") || sfsChoice.equalsIgnoreCase("T")) {
                             saveFileChoice=true;
                         }else{
                             System.out.println("Invalid choice. Try again.");
@@ -182,7 +180,7 @@ public class Main {
                     }
 
                     switch (sfsChoice.toUpperCase()) {
-                        case "CPFS":
+                        case "P":
                             System.out.println("--------------Change Participant File Save Settings-----------------------");
                             System.out.println("│ " + "Save To File(File)" + " │ " + "Save To Folder(Folder)" + " │ ");
 
@@ -234,7 +232,7 @@ public class Main {
                             }
                              break;
 
-                        case "CTFS":
+                        case "T":
                             System.out.println("--------------Change Team File Save Settings-----------------------");
                             System.out.println("│ " + "Save To File(File)" + " │ " + "Save To Folder(Folder)" + " │ ");
 
